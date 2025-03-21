@@ -1,11 +1,11 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
-from flask_jwt_extended import create_access_token, JWTManager
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'SUPER_SECRET_KEY'
+app.config['JWT_SECRET_KEY'] = 'SUPER_SECRET_KEY'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 #app.secret_key = 'secret_key'
@@ -45,14 +45,38 @@ class UserLogin(Resource):
         user = User.query.filter_by(username=username).first()
 
         if user and user.password == password:
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
             return {'access_token': access_token}, 200
 
         return {'message': 'Invalid username or password.'}, 401
 
+class GetUser(Resource):
+    @jwt_required()
+    def get(self):
+        current_user_id = get_jwt_identity()
+        return {'user_id': current_user_id}, 200
+
+
+class UserList(Resource):
+    def get(self):
+        users = User.query.all()
+        user_list = []
+
+        for user in users:
+            user_data = {
+                'id': user.id,
+                'username': user.username
+                # Don't include password for security reasons
+            }
+            user_list.append(user_data)
+
+        return jsonify(users=user_list)
+
 
 api.add_resource(UserRegistration, '/register')
 api.add_resource(UserLogin, '/login')
+api.add_resource(GetUser, '/getuser')
+api.add_resource(UserList, '/')
 
 if __name__ == '__main__':
     app.run (debug=True)
