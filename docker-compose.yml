@@ -1,0 +1,6 @@
+version: '2.33'
+services:
+  web:
+    image: ankesh236/auth-jwt:latest
+    ports:
+      - "5000:5000"
