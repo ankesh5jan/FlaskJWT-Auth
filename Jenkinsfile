@@ -36,7 +36,6 @@ pipeline {
                         sh "docker logout"
                     }
                 }
-
             }
         }
         stage('Deploy'){
