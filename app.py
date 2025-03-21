@@ -79,4 +79,4 @@ api.add_resource(GetUser, '/getuser')
 api.add_resource(UserList, '/')
 
 if __name__ == '__main__':
-    app.run (debug=True)
+    app.run (host="0.0.0.0", port=5000, debug=True)
