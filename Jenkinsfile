@@ -64,13 +64,37 @@ pipeline {
                 }
             }
         }
-        stage('Deploy'){
+        stage('Dev deploy'){
             steps{
-                echo 'Deploying the docker container'
+                echo 'Deploying the docker container - DEV'
              //   sh "docker run -p 5000:5000 -d ankesh236/auth-jwt:latest"
                 sh "docker-compose down && docker-compose up -d"
             }
         }
-
+        stage("Slack notify -DEV"){
+            steps{
+                echo "Notify DEV slack channel."
+            }
+        }
+        stage("Dev approval"){
+            steps{
+                echo "Taking approval from Dev Manager to QA deployment"
+                timeout(time: 3, unit: "DAYS") {
+                     input message: "Do you want to deploy?", submitter: "admin"
+                }
+            }
+        }
+        stage('QA deploy'){
+            steps{
+                echo 'Deploying the docker container - QA'
+             //   sh "docker run -p 5000:5000 -d ankesh236/auth-jwt:latest"
+                sh "docker-compose down && docker-compose up -d"
+            }
+        }
+         stage("Slack notify - QA"){
+            steps{
+                echo "Notify QA slack channel"
+            }
+        }
     }
 }
